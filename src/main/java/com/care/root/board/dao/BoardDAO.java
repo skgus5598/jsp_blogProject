@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import com.care.root.board.dto.BoardDTO;
+import com.care.root.paging.PageCount;
 
 
 public class BoardDAO {
@@ -27,12 +28,18 @@ public class BoardDAO {
 		}
 	}
 	
-	public ArrayList<BoardDTO> list(){
+	public ArrayList<BoardDTO> list(int start, int end){
 		ArrayList<BoardDTO> list = new ArrayList<BoardDTO>();
 //		String sql = "select * from test_board";		
-		String sql = "select * from test_board order by idgroup desc, step asc";
+//		String sql = "select * from test_board order by idgroup desc, step asc";
+		String sql=
+				"select B.* from(select rownum rn, A.* from(select * from test_board "
+				+ "order by idgroup desc, step asc)A)B where rn between ? and ?";
 		try {
 			ps = con.prepareStatement(sql);
+			ps.setInt(1, start);
+			ps.setInt(2, end);
+			
 			rs = ps.executeQuery();
 			while(rs.next()) {
 				BoardDTO	d = new BoardDTO();
@@ -158,6 +165,43 @@ public class BoardDAO {
 		}				
 	}
 	
+	public int getTotalPage() {
+		String sql = "select count(*) from test_board";
+		int totPage=0;
+		try {
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				totPage = rs.getInt(1); //1을 넣어야 나온다 한다..0넣으면 안나온다..궁금하면 알아보기
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		return totPage;
+	}
+	
+	public PageCount pagingNum(int start) {
+		PageCount pc = new PageCount();
+		if(start == 0) {
+			start = 1;
+		}
+		int pageNum = 3;
+		int totalPage = getTotalPage();
+		
+		int totEndPage = totalPage / pageNum;
+		if( totalPage % pageNum != 0) {
+			totEndPage ++;
+		}
+		
+		int endPage = start * pageNum;
+		int startPage = endPage + 1 -pageNum;
+		
+		pc.setStartPage(startPage); //페이지별 첫번째 게시물 번호
+		pc.setEndPage(endPage); //페이지별 마지막 게시물 번호 ??
+		pc.setTotEndPage(totEndPage); //페이징 마지막 페이지 번호
+		
+		return pc;
+	}
 }
 
 

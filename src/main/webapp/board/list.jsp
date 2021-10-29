@@ -20,8 +20,9 @@
 			<th>번호</th><th>이름</th><th>제목</th><th>날짜</th>
 			<th>조회수</th><th>idgroup</th><th>step</th><th>indent</th>
 		</tr>
+		<c:set var="pc" value="${dao.pagingNum(param.start) }"/>
 		
-		<c:forEach var="dto"  items="${dao.list() }">
+		<c:forEach var="dto"  items="${dao.list(pc.startPage, pc.endPage) }">
 		<tr>
 			<td>${dto.id }</td><td>${dto.name }</td>
 			<td>
@@ -53,13 +54,13 @@
 				</c:otherwise>
 			</c:choose>
 			
-	<c:set var="count" value="5"/>
-			<c:forEach var="cnt" begin="1" end="${count }" step="1">
+<!--  	<c:set var="count" value="5"/> -->
+			<c:forEach var="cnt" begin="1" end="${pc.totEndPage }" step="1">
 				<a href="list.jsp?start=${cnt }">[${cnt }]</a>
 			</c:forEach>
 			
 				<c:choose>
-				<c:when test="${start < count }">
+				<c:when test="${start < pc.totEndPage }">
 					<button onclick="location.href='list.jsp?start=${start +1}'">다음</button>
 				</c:when>
 				<c:otherwise>
